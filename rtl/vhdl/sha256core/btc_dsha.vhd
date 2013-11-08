@@ -1,5 +1,30 @@
--- Copyright (c) 2013 VariStream
--- Auther : Yu Peng
+------------------------------------------------------------------- 
+--                                                               --
+--  Copyright (C) 2013 Author and VariStream Studio              --
+--  Author : Yu Peng                                             --
+--                                                               -- 
+--  This source file may be used and distributed without         -- 
+--  restriction provided that this copyright statement is not    -- 
+--  removed from the file and that any derivative work contains  -- 
+--  the original copyright notice and the associated disclaimer. -- 
+--                                                               -- 
+--  This source file is free software; you can redistribute it   -- 
+--  and/or modify it under the terms of the GNU Lesser General   -- 
+--  Public License as published by the Free Software Foundation; -- 
+--  either version 2.1 of the License, or (at your option) any   -- 
+--  later version.                                               -- 
+--                                                               -- 
+--  This source is distributed in the hope that it will be       -- 
+--  useful, but WITHOUT ANY WARRANTY; without even the implied   -- 
+--  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      -- 
+--  PURPOSE.  See the GNU Lesser General Public License for more -- 
+--  details.                                                     -- 
+--                                                               -- 
+--  You should have received a copy of the GNU Lesser General    -- 
+--  Public License along with this source; if not, download it   -- 
+--  from http://www.opencores.org/lgpl.shtml                     -- 
+--                                                               -- 
+-------------------------------------------------------------------
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -13,9 +38,10 @@ entity btc_dsha is
 		gBASE_DELAY : integer := 1
 	);
 	port(
+		iRst_async : in std_logic := '0';
+		
 		iClkReg : in std_logic := '0';
 		iClkProcess : in std_logic := '0';
-		iRst_async : in std_logic := '0';
 		
 		iValid_p : in std_logic := '0';
 		ivAddr : in std_logic_vector(3 downto 0) := (others=>'0');
@@ -108,8 +134,6 @@ architecture behavioral of btc_dsha is
 	end component;
 	
 	constant cCMD_ADDR : std_logic_vector(3 downto 0) := X"D";
-	constant cCMD_IDLE : std_logic_vector(15 downto 0) := X"0000";
-	constant cCMD_RESET : std_logic_vector(15 downto 0) := X"CAFE";
 	constant cCMD_START : std_logic_vector(15 downto 0) := X"0001";
 	
 	constant cPROCESS_DEALY : std_logic_vector(15 downto 0) := conv_std_logic_vector(64 * gBASE_DELAY * 2 + 1, 16);
@@ -138,7 +162,6 @@ architecture behavioral of btc_dsha is
 	signal svNonce : std_logic_vector(31 downto 0) := (others=>'0');
 	signal svCmd : std_logic_vector(15 downto 0) := (others=>'0');
 	signal sCmdValid_syncReg_p : std_logic := '0';
-	signal sCmdReset : std_logic := '0';
 	signal sCmdStart_syncReg_p : std_logic := '0';
 	signal sCmdStart_syncProcess_p : std_logic := '0';
 	signal sCmdStart_syncProcess_p_1d : std_logic := '0';
@@ -165,6 +188,7 @@ architecture behavioral of btc_dsha is
 	signal sReachEndToIdle : std_logic := '0';
 	
 begin
+	
 	SyncReset_inst_Process : SyncReset
 		port map(
 			iClk => iClkProcess,
@@ -225,21 +249,13 @@ begin
 			end if;
 		end if;
 	end process;
-
+	
 	process(iClkReg, iRst_async)
 	begin
 		if iRst_async = '1' then
-			sCmdReset <= '0';
 			sCmdValid_syncReg_p <= '0';
-		elsif rising_edge(iClkReg) then
-			if iValid_p = '1' and ivAddr = cCMD_ADDR then
-				if ivData(15 downto 0) = cCMD_RESET then
-					sCmdReset <= '1';
-				else
-					sCmdReset <= '0';
-				end if;
-			end if;
-			
+			sCmdStart_syncReg_p <= '0';
+		elsif rising_edge(iClkReg) then			
 			if iValid_p = '1' and ivAddr = cCMD_ADDR then
 				sCmdValid_syncReg_p <= '1';
 			else
