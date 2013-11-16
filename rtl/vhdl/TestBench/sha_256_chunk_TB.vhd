@@ -26,13 +26,13 @@
 --                                                               -- 
 -------------------------------------------------------------------
 
-library hotan;
-use hotan.sha_256_pkg.all;
 library ieee;
 use ieee.NUMERIC_STD.all;
 use ieee.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.NUMERIC_STD.ALL;
+
+use work.sha_256_pkg.all;
 
 	-- Add your library and packages declaration here ...
 
