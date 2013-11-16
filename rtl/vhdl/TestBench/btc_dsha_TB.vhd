@@ -117,8 +117,8 @@ architecture TB_ARCHITECTURE of btc_dsha_tb is
 	signal ovDigest : tDwordArray(0 to 7) := (others=>(others=>'0'));
 
 	-- Add your code here ...
-	constant cREG_CLK_PERIOD : time := 30 ns; -- 33M Register Clock
-	constant cPROC_CLK_PERIOD : time := 10 ns; -- 100M Processing Clock
+	constant cREG_CLK_PERIOD : time := 10 ns; -- 100M Register Clock
+	constant cPROC_CLK_PERIOD : time := 5 ns; -- 200M Processing Clock
 	constant cRESET_INTERVAL : time := 71 ns;
 	constant cSTRAT_TEST : integer := 25;
 	
@@ -210,7 +210,7 @@ begin
 				svWriteCnt <= svWriteCnt + '1';
 			end if;
 			
-			if svWriteCnt(3 downto 0) = X"F" and svWriteCnt(15 downto 4) <= conv_std_logic_vector(13, 12) then
+			if svWriteCnt(1 downto 0) = "11" and svWriteCnt(13 downto 2) <= conv_std_logic_vector(13, 12) then
 				iValid_p <= '1';
 			else
 				iValid_p <= '0';
@@ -224,8 +224,8 @@ begin
 			ivAddr <= (others=>'0');
 			ivData <= (others=>'0');
 		elsif rising_edge(iClkReg) then
-			if svWriteCnt(3 downto 0) = X"F" then
-				case svWriteCnt(15 downto 4) is
+			if svWriteCnt(1 downto 0) = "11" then
+				case svWriteCnt(13 downto 2) is
 					when X"000" =>
 					ivAddr <= X"0";
 					ivData <= svMidState(0);
@@ -272,11 +272,11 @@ begin
 					
 					when X"00B" =>
 					ivAddr <= X"B";
-					ivData <= svWork(19) - X"20";
+					ivData <= svWork(19) - X"02";
 					
 					when X"00C" =>
 					ivAddr <= X"C";
-					ivData <= svWork(19) + X"20";
+					ivData <= svWork(19) + X"02";
 					
 					when X"00D" =>
 					ivAddr <= cCMD_ADDR;

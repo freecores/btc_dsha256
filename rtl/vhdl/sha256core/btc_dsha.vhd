@@ -47,8 +47,8 @@ entity btc_dsha is
 		ivAddr : in std_logic_vector(3 downto 0) := (others=>'0');
 		ivData : in std_logic_vector(31 downto 0) := (others=>'0');
 		
-		oReachEnd : out std_logic := '0';
-		oFoundNonce : out std_logic := '0';
+		oReachEnd_p : out std_logic := '0';
+		oFoundNonce_p : out std_logic := '0';
 		ovNonce : out std_logic_vector(31 downto 0) := (others=>'0');
 		ovDigest : out tDwordArray(0 to 7) := (others=>(others=>'0'))
 	);				 	 
@@ -134,6 +134,7 @@ architecture behavioral of btc_dsha is
 	end component;
 	
 	constant cCMD_ADDR : std_logic_vector(3 downto 0) := X"D";
+	constant cCMD_NOP : std_logic_vector(15 downto 0) := X"0000";
 	constant cCMD_START : std_logic_vector(15 downto 0) := X"0001";
 	
 	constant cPROCESS_DEALY : std_logic_vector(15 downto 0) := conv_std_logic_vector(64 * gBASE_DELAY * 2 + 1, 16);
@@ -837,12 +838,12 @@ begin
 	begin
 		if rising_edge(iClkProcess) then
 			if sCmdStart_syncProcess_p = '1' then
-				oReachEnd <= '0';
+				oReachEnd_p <= '0';
 			else
 				if sProcess = stSearch and sReachEndToIdle = '1' and sFoundNonceToIdle = '0' then
-					oReachEnd <= '1';
+					oReachEnd_p <= '1';
 				else
-					oReachEnd <= '0';
+					oReachEnd_p <= '0';
 				end if;
 			end if;
 		end if;
@@ -867,12 +868,12 @@ begin
 	begin
 		if rising_edge(iClkProcess) then
 			if sCmdStart_syncProcess_p = '1' then
-				oFoundNonce <= '0';
+				oFoundNonce_p <= '0';
 			else
 				if sProcess = stSearch and sFoundNonceToIdle = '1' then
-					oFoundNonce <= '1';
+					oFoundNonce_p <= '1';
 				else
-					oFoundNonce <= '0';
+					oFoundNonce_p <= '0';
 				end if;
 			end if;
 		end if;
